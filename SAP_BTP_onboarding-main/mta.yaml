@@ -1,0 +1,127 @@
+_schema-version: '3.1'
+ID: incidents-mgmt
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npx cds build --production
+        - rm -rf incidents-ui-deployer/resources
+        - npm install --production
+        - npx -p @sap/cds-dk cds build --production
+        - mkdir gen/ui-resources
+modules:
+  - name: incidents-mgmt-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: incidents-mgmt-auth
+      - name: incidents-mgmt-db
+
+  - name: incidents-mgmt-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: incidents-mgmt-db
+
+  - name: incidents-mgmt-ui-resources
+    type: com.sap.application.content
+    path: gen/ui-resources
+    requires:
+      - name: incidents-mgmt-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      requires:
+        - name: incidents-mgmt
+          artifacts:
+            - ./*.zip
+          target-path: .
+
+  - name: incidents-mgmt
+    type: html5
+    path: app/incidents
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npx -p @ui5/cli ui5 build --dest ../../gen/app/incidents/dist --include-task=generateManifestBundle --include-task=generateCachebusterInfo
+        - bash -c "cd ../../gen/app/incidents/dist && npx bestzip ../incidents.zip *"
+      supported-platforms: []
+      build-result: ../../gen/app/incidents
+
+  - name: incidents-mgmt-portal-content-deployer
+    type: com.sap.application.content
+    path: packages/deploy-int/portal-content
+    requires:
+      - name: incidents-mgmt-portal
+        parameters:
+          content-target: true
+          service-key:
+            name: incidents-portal-deploy-key
+            config:
+              content-endpoint: developer
+      - name: incidents-mgmt-auth
+      - name: incidents-mgmt-html5-repo-host
+      - name: incidents-mgmt-ui-resources
+
+  - name: incidents-approuter
+    type: nodejs
+    path: packages/deploy-int/approuter
+    parameters:
+      memory: 128M
+    requires:
+      - name: incidents-mgmt-auth
+      - name: incidents-mgmt-portal
+      - name: incidents-mgmt-html5-repo-runtime
+      - name: srv-api
+        group: destinations
+        properties:
+          forwardAuthToken: true
+          strictSSL: true
+          name: srv-api
+          url: '~{srv-url}'
+
+resources:
+  - name: incidents-mgmt-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: incidents-mgmt-${org}-${space}
+        tenant-mode: dedicated
+  - name: incidents-mgmt-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: incidents-mgmt-portal
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: standard
+      service: portal
+  - name: incidents-mgmt-html5-repo-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-runtime
+      service: html5-apps-repo
+  - name: incidents-mgmt-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-host
+      service: html5-apps-repo

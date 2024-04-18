@@ -1,0 +1,206 @@
+{
+    "_version": "1.59.0",
+    "sap.app": {
+        "id": "ns.incidents",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:lrop",
+            "version": "1.12.0",
+            "toolsId": "fa434006-c23a-4a81-a785-0f90bde65d0e"
+        },
+        "crossNavigation": {
+            "inbounds": {
+                "intent1": {
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    },
+                    "semanticObject": "Incidents",
+                    "action": "display"
+                }
+            }
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "/odata/v4/processors/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "localUri": "localService/metadata.xml",
+                    "odataVersion": "4.0"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.120.3",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.ushell": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "ns.incidents.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "@i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "uri": "i18n/i18n.properties"
+            }
+        },
+        "extends": {
+            "extensions": {
+                "sap.ui.controllerExtensions": {
+                    "sap.fe.templates.ListReport.ListReportController": {
+                        "controllerName": "ns.incidents.controller.ListReportExt"
+                    }
+                }
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "IncidentsList",
+                    "target": "IncidentsList"
+                },
+                {
+                    "pattern": "Incidents({key}):?query:",
+                    "name": "IncidentsObjectPage",
+                    "target": "IncidentsObjectPage"
+                },
+                {
+                    "pattern": "Incidents({key})/conversations({key2}):?query:",
+                    "name": "ConversationsObjectPage",
+                    "target": "ConversationsObjectPage"
+                }
+            ],
+            "targets": {
+                "IncidentsList": {
+                    "type": "Component",
+                    "id": "IncidentsList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/Incidents",
+                            "variantManagement": "Page",
+                            "navigation": {
+                                "Incidents": {
+                                    "detail": {
+                                        "route": "IncidentsObjectPage"
+                                    }
+                                }
+                            },
+                            "initialLoad": "Enabled",
+                            "controlConfiguration": {
+                                "@com.sap.vocabularies.UI.v1.LineItem": {
+                                    "actions": {
+                                        "openDiagram": {
+                                            "id": "openUpDiagram",
+                                            "text": "{{Generate_Diagram}}",
+                                            "press": ".extension.ns.incidents.controller.ListReportExt.openDiagram",
+                                            "requiresSelection": false
+                                        }
+                                    },
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "IncidentsObjectPage": {
+                    "type": "Component",
+                    "id": "IncidentsObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "contextPath": "/Incidents",
+                            "navigation": {
+                                "conversations": {
+                                    "detail": {
+                                        "route": "ConversationsObjectPage"
+                                    }
+                                }
+                            },
+                            "controlConfiguration": {
+                                "conversations/@com.sap.vocabularies.UI.v1.LineItem#Conversation": {
+                                    "tableSettings": {
+                                        "type": "ResponsiveTable",
+                                        "creationMode": {
+                                            "name": "Inline"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ConversationsObjectPage": {
+                    "type": "Component",
+                    "id": "ConversationsObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "editableHeaderContent": false,
+                            "contextPath": "/Incidents/conversations"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    }
+}
