@@ -13,3 +13,4 @@ The following steps comprise a beginner's tutorial for developing applications o
 9. [Set Up Launchpad](09_Set_Up_Launchpad.md)
 10. [Deploy and Test App in SAP BTP](10_Deploy_and_Test_App_in_SAP_BTP.md)
 11. [AI Analytics](11_AI_Analytics.md)
+12. [Gen AI to Diagram](12_Gen_AI_to_Diagram.md)

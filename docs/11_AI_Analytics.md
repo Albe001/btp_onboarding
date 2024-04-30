@@ -7,6 +7,9 @@
 
 [CAP Documentation](https://cap.cloud.sap/docs/).
 
+**Next Steps**
+[Gen AI to Diagram](12_Gen_AI_to_Diagram.md).
+
 ## Fiori Action
 
 In this Guide we want to use AI to help us with the Analysis of our incidents. 
@@ -71,7 +74,9 @@ Now the `onCheckAi(req)` functions remains to be implemented.
    At first we gather the Incidents data:
 
 ```js
-async onCheckAI(req) {
+class ProcessorsService extends cds.ApplicationService {
+  . . .
+  async onCheckAI(req) {
     let incidents = await SELECT`ID,title,urgency_code,status_code`.from (this.entities.Incidents);
     const headers = Object.keys(incidents[0]);
     let csv = headers.join(',') + '\n';
@@ -80,6 +85,8 @@ async onCheckAI(req) {
       const values = headers.map(header => obj[header]);
       csv += values.join(',') + '\n';
     })
+  }
+  . . . 
 }
 ```
 By using a `SELECT` statement, we get the Incidents data in JSON format. The remaining code converts it into csv format.
@@ -133,9 +140,7 @@ async function getToken() {
   .then(data => {
    return data.access_token;
   })
-  .catch(error => console.error(error));
-
-  
+  .catch(error => console.error(error)); 
 }
 
 async function doQuery(token,query,inputCsv) {
@@ -203,3 +208,6 @@ You have implented a button that can be used to ask an AI service for analysis o
 [Deplay and Test App in SAP BTP](10_Deplay_and_Test_App_in_SAP_BTP.md).
 
 [Table of Contents](Table_of_Contents.md).
+
+**Next Steps**
+[GEN AI to Diagram](12_Gen_AI_to_Diagram.md).

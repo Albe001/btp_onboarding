@@ -22,7 +22,7 @@
                 <TextArea
                     width="300px"
                     id="_IDGenTextArea1"
-                    value="{$Parameter/Query} Give me the title and urgency of all incidents. "
+                    value="{data>/Query}"
                     rows="4"
                     editable="false"
                 />
